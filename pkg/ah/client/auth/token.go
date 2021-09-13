@@ -46,7 +46,6 @@ func requestNewToken() Token {
   var anonymous bool
 
   code, err := GetCode()
-  c := &http.Client{}
 
   if err != nil {
     url = "https://api.ah.nl/mobile-auth/v1/auth/token/anonymous"
@@ -59,8 +58,44 @@ func requestNewToken() Token {
   }
 
   body := bytes.NewBuffer(data)
-
   req, err := http.NewRequest("POST", url, body)
+  resBody := makeRequest(req)
+
+  if err != nil {
+    fmt.Println("Failure: ", err)
+  }
+
+  var t Token
+  json.Unmarshal([]byte(resBody), &t)
+  t.Anonymous = anonymous
+
+  saveToken(t)
+
+  return t
+}
+
+func Refresh() Token {
+  oldT := GetToken()
+  data := []byte(`{"refreshToken":"` + oldT.Refresh + `","clientId":"appie"}`)
+  body := bytes.NewBuffer(data)
+  req, err := http.NewRequest("POST", "https://api.ah.nl/mobile-auth/v1/auth/token/refresh", body)
+  resBody := makeRequest(req)
+
+  if err != nil {
+    fmt.Println("Failure: ", err)
+  }
+
+  var t Token
+  json.Unmarshal([]byte(resBody), &t)
+  t.Anonymous = oldT.Anonymous
+
+  saveToken(t)
+
+  return t
+}
+
+func makeRequest(req *http.Request) []byte {
+  c := &http.Client{}
 
   req.Header.Add("Content-Type", "application/json")
   req.Header.Add("Accept", "*/*")
@@ -71,16 +106,9 @@ func requestNewToken() Token {
   res, err := c.Do(req)
 
   if err != nil {
-    fmt.Println("Failure : ", err)
+    fmt.Println("Failure: ", err)
   }
 
   resBody, _ := ioutil.ReadAll(res.Body)
-
-  var t Token
-  json.Unmarshal([]byte(resBody), &t)
-  t.Anonymous = anonymous
-
-  saveToken(t)
-
-  return t
+  return resBody
 }

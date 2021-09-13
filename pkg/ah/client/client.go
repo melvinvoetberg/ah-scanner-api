@@ -74,10 +74,23 @@ func makeRequest(ac *AhClient, req *http.Request) []byte {
 	c := ac.Client
 	res, err := c.Do(req)
 
+	var resBody []byte
+
+	resBody, _ = ioutil.ReadAll(res.Body)
+
+	if res.StatusCode == 401 {
+    ahauth.Refresh()
+
+    tp := AhTransport{}
+		c = tp.Client()
+
+		res, err = c.Do(req)
+		resBody, _ = ioutil.ReadAll(res.Body)
+  }
+
 	if err != nil {
 		fmt.Println("Failure: ", err)
 	}
 
-	resBody, _ := ioutil.ReadAll(res.Body)
 	return resBody
 }
