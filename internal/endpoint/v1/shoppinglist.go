@@ -7,7 +7,7 @@ import (
 
 type ShoppinglistAddBody struct {
 	Type string `json:"type"`
-	Id int `json:"id"`
+	Id uint64 `json:"id"`
 }
 
 func Shoppinglist(c *gin.Context) {

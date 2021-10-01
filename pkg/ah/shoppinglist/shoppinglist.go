@@ -28,7 +28,7 @@ func GetShoppinglist() Shoppinglist {
 	return s
 }
 
-func AddProduct(fir int) Shoppinglist {
+func AddProduct(fir uint64) Shoppinglist {
 	cs := GetShoppinglist()
 	i, found := indexInShoppinglist(cs, fir)
 
@@ -38,7 +38,7 @@ func AddProduct(fir int) Shoppinglist {
 		q = cs.Items[i].Quantity + 1
 	}
 
-	b := `{"items":[{"quantity":` + strconv.Itoa(q) + `,"productId":` + strconv.Itoa(fir) + `,"originCode":"PRD","type":"SHOPPABLE"}]}`
+	b := `{"items":[{"quantity":` + strconv.Itoa(q) + `,"productId":` + strconv.FormatUint(fir, 10) + `,"originCode":"PRD","type":"SHOPPABLE"}]}`
 
 	ac := ahclient.Client()
 	ac.Patch("shoppinglist/v2/items", b)
@@ -46,12 +46,12 @@ func AddProduct(fir int) Shoppinglist {
 	return GetShoppinglist()
 }
 
-func AddProductGTIN(gtin int) Shoppinglist {
+func AddProductGTIN(gtin uint64) Shoppinglist {
 	p := ahproduct.SearchGTIN(gtin)
 	return AddProduct(p.FIR)
 }
 
-func indexInShoppinglist(s Shoppinglist, fir int) (i int, found bool) {
+func indexInShoppinglist(s Shoppinglist, fir uint64) (i int, found bool) {
 	for i := range s.Items {
     if s.Items[i].Product.FIR == fir {
     	return i, true

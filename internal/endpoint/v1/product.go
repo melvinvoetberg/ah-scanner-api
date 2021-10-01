@@ -7,7 +7,7 @@ import (
 )
 
 func ProductFIR(c *gin.Context) {
-	fir, _ := strconv.Atoi(c.Param("fir"))
+	fir, _ := strconv.ParseUint(c.Param("fir"), 10, 64)
 	p := ahproduct.GetProduct(fir)
 
 	c.JSON(200, gin.H{
@@ -16,7 +16,7 @@ func ProductFIR(c *gin.Context) {
 }
 
 func ProductGTIN(c *gin.Context) {
-	gtin, _ := strconv.Atoi(c.Param("gtin"))
+	gtin, _ := strconv.ParseUint(c.Param("gtin"), 10, 64)
 	p := ahproduct.SearchGTIN(gtin)
 
 	c.JSON(200, gin.H{
